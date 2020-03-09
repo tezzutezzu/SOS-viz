@@ -1,9 +1,10 @@
 const START_OPACITY = 0.8;
 let data;
-
+let smallR = 2;
 const toNumber = n => parseInt(n === "" ? 0 : n);
 
 d3.json("data2.json").then(d => {
+  //   d[0] = d[0].slice(0, 50);
   console.error(
     d[0].filter(d => d.appuntamenti.length == 0).length +
       " eventi senza appuntamenti!"
@@ -22,15 +23,17 @@ d3.json("data2.json").then(d => {
       dd.partecipanti = toNumber(dd.pugliesi) + toNumber(dd.nonpugliesi);
       return dd;
     })
-    .sort((a, b) => {
-      if (!a.start) console.log(a);
+    .sort((a, b) => b.start - a.start);
 
-      return a.start - b.start;
-    });
-
-  const margin = { top: 100, right: 20, bottom: 350, left: 100 };
+  const margin = { top: 50, right: 20, bottom: 50, left: 40 };
   const height = window.innerHeight - 20;
   const width = window.innerWidth - 20;
+
+  const yRange = [margin.top, height - margin.bottom];
+  const y = d3
+    .scaleLinear()
+    .domain([0, data.length])
+    .range(yRange);
 
   const x = d3
     .scaleTime()
@@ -42,13 +45,12 @@ d3.json("data2.json").then(d => {
     .scaleLinear()
     .domain(d3.extent(data, d => d.partecipanti).reverse())
     .nice()
-    .range([margin.top, height - margin.top - margin.bottom]);
+    .range(yRange);
 
   const r = d3
     .scaleSqrt()
-    .domain(d3.extent(data, d => d.prezzo))
-    .nice()
-    .range([8, 20]);
+    .domain(d3.extent(data, d => d.partecipanti))
+    .range([2, 5]);
 
   const color = d3.scaleOrdinal(
     data.map(d => d.xyz),
@@ -60,50 +62,51 @@ d3.json("data2.json").then(d => {
   const zoom = d3.zoom().on("zoom", () => {
     const k = d3.event.transform.k;
     const tx = d3.event.transform.x / k;
+    const ty = d3.event.transform.y / k;
     currentScale = k;
     x.range([
       (margin.left + tx) * k,
       (tx + width - margin.right - margin.left) * k
     ]);
+
+    y.range([
+      (margin.top + ty) * k,
+      (ty + height - margin.top - margin.bottom) * k
+    ]);
+
+    smallR = k;
+    r.range([3 * k, 8 * k]);
     update();
   });
 
-  let nonsvoltiCount = 0;
-  let svoltiCount = 0;
   //add shortcuts
-  data = data.map(d => {
+  data = data.map((d, i) => {
     d.x = x(d.start) || 0;
     d.svolto = d.status;
     d.color = d.svolto ? color(d.category) : "#ddd";
-    d.r = d.svolto ? r(d.prezzo) : 2;
-    d.y = d.svolto
-      ? margin.top + svoltiCount * 6
-      : height - margin.bottom + nonsvoltiCount * 6;
-    !d.svolto ? nonsvoltiCount++ : svoltiCount++;
+    d.y = y(i);
     return d;
   });
 
   const update = () => {
-    data = data.map(d => {
+    data = data.map((d, i) => {
       d.x = x(d.start) || 0;
+      d.y = y(i);
       return d;
     });
 
     d3.selectAll(".corso-svolto")
       .attr("transform", d => `translate(${d.x},${d.y})`)
       .each(function(d) {
-        d3.select(this)
-          .select(".hitarea")
-          .attr("width", x(d.end) - x(d.start) + d.r * 2);
+        const el = d3.select(this);
 
-        d3.select(this)
-          .select(".line")
-          .attr("width", x(d.end) - x(d.start) + 4);
+        el.select(".line").attr("x2", x(d.end) - x(d.start));
 
-        d3.select(this)
-          .select(".events")
-          .selectAll("rect")
-          .attr("transform", dd => `translate(${x(dd) - d.x}, -4)`);
+        el.select("circle").attr("r", d.svolto ? r(d.partecipanti) : 2);
+        el.select(".events")
+          .selectAll("circle")
+          .attr("r", smallR)
+          .attr("transform", dd => `translate(${x(dd) - d.x}, 0)`);
       });
 
     d3.select(".xAxis").call(
@@ -152,24 +155,6 @@ d3.json("data2.json").then(d => {
     .attr("font-family", "sans-serif")
     .attr("font-size", 10)
     .attr("dy", "0.35em");
-
-  const dropdown = d3
-    .select("body")
-    .append("select")
-    .style("position", "absolute")
-    .style("top", "30px")
-    .style("left", "30px")
-    .on("change", d => {
-      currentYaxis = d3.event.target.selectedIndex;
-      updateYAxis();
-    });
-
-  dropdown
-    .selectAll("option")
-    .data(["partecipanti", "costo"])
-    .join("option")
-    .text(d => d)
-    .attr("value", d => d);
 
   let activeNode = null;
 
@@ -239,12 +224,12 @@ d3.json("data2.json").then(d => {
     .attr("transform", d => `translate(${d.x},${d.y})`)
     .each(function(d) {
       // main circle
-      //   d3.select(this)
-      //     .append("circle")
-      //     .style("pointer-events", "none")
-      //     .attr("stroke", d3.color(d.color).darker()) //"rgba(0,0,0,.2)";
-      //     .attr("fill", d.color) //"rgba(0,0,0,.2)";
-      //     .attr("r", d.r);
+      d3.select(this)
+        .append("circle")
+        .style("cursor", "pointer")
+        .attr("stroke", d3.color(d.color).darker()) //"rgba(0,0,0,.2)";
+        .attr("fill", d.color) //"rgba(0,0,0,.2)";
+        .attr("r", d.r);
 
       if (d.appuntamenti.length > 1) {
         const lineheight = 4;
@@ -273,16 +258,7 @@ d3.json("data2.json").then(d => {
             .attr("r", 2);
         }
       }
-
-      // hit area
-      d3.select(this)
-        .append("rect")
-        .attr("class", "hitarea")
-        .style("cursor", "pointer")
-        .attr("fill", "rgba(255,255,0,0)")
-        .attr("transform", `translate(${-d.r},${-d.r})`)
-        .attr("height", d.r * 2)
-        .attr("width", x(d.end) - x(d.start) + d.r * 2);
+      // .attr("transform", `translate(${-d.r},${-d.r})`);
     })
     .on("mouseout", hideTooltip)
     .on("mouseover", showTooltip);
@@ -300,5 +276,5 @@ d3.json("data2.json").then(d => {
     .attr("width", margin.right)
     .attr("height", height);
 
-  svg.append("g").call(yAxis);
+  //   svg.append("g").call(yAxis);
 });
