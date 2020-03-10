@@ -4,14 +4,14 @@ let smallR = 2;
 const toNumber = n => parseInt(n === "" ? 0 : n);
 
 d3.json("data2.json").then(d => {
-  console.error(d[0].filter(d => d.appuntamenti.length == 0));
-
   data = d[0]
     .filter(d => d.appuntamenti.length > 0)
     .map(dd => {
       dd.appuntamenti = dd.appuntamenti.map(d =>
         moment(d, "YYYY-MM-DD ").toDate()
       );
+
+      console.log(dd.utile);
 
       dd.start = d3.min(dd.appuntamenti);
       dd.end = d3.max(dd.appuntamenti);
@@ -293,28 +293,24 @@ d3.json("data2.json").then(d => {
 
   update();
 
-  // const dropdown = d3
-  //   .select("body")
-  //   .append("select")
-  //   .style("position", "absolute")
-  //   .style("top", "30px")
-  //   .style("left", "30px")
-  //   .on("change", d => {
-  //     currentY = d3.event.target.selectedIndex == 0 ? y : yPartecipant;
-  //     updateYAxis();
-  //   });
-
-  const dropdown = d3
+  const controls = d3
     .select("body")
     .append("div")
     .style("position", "absolute")
     .style("top", 10 + "px")
-    .style("left", 10 + "px")
+    .style("left", 10 + "px");
+
+  const dropdown = controls.append("select").on("change", d => {
+    currentY = d3.event.target.selectedIndex == 0 ? y : yPartecipant;
+    updateYAxis();
+  });
+
+  const checkboxes = controls
     .selectAll("div")
     .data(Object.keys(visualizedItems))
     .join("div");
 
-  dropdown
+  checkboxes
     .append("input")
     .attr("name", d => d)
     .attr("type", "checkbox")
@@ -324,7 +320,7 @@ d3.json("data2.json").then(d => {
       update();
     });
 
-  dropdown
+  checkboxes
     .append("label")
     .style("color", "white")
     .attr("for", d => d)
