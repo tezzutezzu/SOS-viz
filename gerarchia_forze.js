@@ -48,7 +48,6 @@ function loadData() {
       .force(
         "charge",
         d3.forceManyBody().strength((d) => {
-          console.log(d);
           return -parseFloat(d.data.Size) * 100;
         })
       )
@@ -56,7 +55,9 @@ function loadData() {
       .force("x", d3.forceX())
       .force("y", d3.forceY());
 
-    const link = svg
+    const group = svg.append("g").attr("class", "viz")
+
+    const link = group
       .append("g")
       .attr("stroke", "#999")
       .attr("stroke-opacity", 0.6)
@@ -64,7 +65,7 @@ function loadData() {
       .data(links)
       .join("line");
 
-    const node = svg.append("g").selectAll("g").data(nodes).join("g");
+    const node = group.append("g").selectAll("g").data(nodes).join("g");
 
     node
       .append("circle")
@@ -102,6 +103,12 @@ function loadData() {
 
       node.attr("transform", (d) => `translate(${d.x} ${d.y})`);
     });
+
+    d3
+      .zoom()
+      .on("zoom", () => {
+        group.attr("transform", d3.event.transform)
+      })(svg);
   });
 }
 
