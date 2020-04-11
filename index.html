@@ -1,38 +1,39 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <meta charset="utf-8" />
-    <title>Corsi SOS</title>
-    <script type="text/javascript" src="d3.min.js"></script>
-    <script type="text/javascript" src="moment.min.js"></script>
-    <style type="text/css">
-      html,
-      body {
-        margin: 0;
-        padding: 0;
-        background: black;
-        font-family: sans-serif;
-      }
-
-      pre {
-        color: #999;
-      }
-      text {
-        fill: #999;
-      }
-
-      .domain,
-      .tick line {
-        stroke: #999;
-      }
-
-      .axisLabel {
-        font-weight: bold;
-        font-size: 16px;
-      }
-    </style>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SOS viz</title>
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+    />
   </head>
-  <body>
-    <script src="main.js"></script>
+
+  <body class="d-flex flex-column h-100">
+    <!-- Begin page content -->
+    <main role="main" class="flex-shrink-0">
+      <div class="container">
+        <h1 class="mt-5">SOS viz</h1>
+        <p class="lead">
+          Prove di visualizzazione
+        </p>
+
+        <ul>
+          <li>
+            <a href="corsi.html"
+              >Corsi (con dati in realtime dal sito della SOS)</a
+            >
+          </li>
+          <li><a href="keywords_audience.html">Keywords audience</a></li>
+          <li>
+            <a href="keywords_nocoding.html">Keywords audience nocoding</a>
+          </li>
+          <li><a href="keywords.html">Keywords frequency</a></li>
+          <li><a href="gerarchia.html">Gerarchia</a></li>
+          <li><a href="gerarchia_forze.html">Gerarchia forze</a></li>
+        </ul>
+      </div>
+    </main>
   </body>
 </html>

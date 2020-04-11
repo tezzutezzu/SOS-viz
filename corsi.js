@@ -1,20 +1,22 @@
 const START_OPACITY = 0.8;
 let data;
+let originalData;
 let smallR = 2;
 const toNumber = n => parseInt(n === "" ? 0 : n);
-
 fetch("https://www.lascuolaopensource.xyz/didattica/index")
   .then(response => response.json())
   .then(d => {
+    originalData = [...d[0]];
     data = d[0]
       .filter(d => d.appuntamenti.length > 0)
       .map(dd => {
         dd.appuntamenti = dd.appuntamenti.map(d =>
           moment(d, "YYYY-MM-DD ").toDate()
         );
+        let utile = dd.utile.replace(",", "");
+        if (utile === "") utile = 0;
 
-        console.log(dd.utile);
-
+        dd.utile = parseInt(utile);
         dd.start = d3.min(dd.appuntamenti);
         dd.end = d3.max(dd.appuntamenti);
         dd.prezzo = toNumber(dd.prezzo);
@@ -26,12 +28,6 @@ fetch("https://www.lascuolaopensource.xyz/didattica/index")
     const margin = { top: 50, right: 20, bottom: 50, left: 40 };
     const height = window.innerHeight - 20;
     const width = window.innerWidth - 20;
-    const visualizedItems = {
-      x: true,
-      y: true,
-      z: true,
-      "non svolti": true
-    };
 
     const yRange = [margin.top, height - margin.bottom];
     const y = d3
@@ -45,10 +41,14 @@ fetch("https://www.lascuolaopensource.xyz/didattica/index")
       .nice()
       .range([margin.left, width - margin.right - margin.left]);
 
-    const yPartecipant = d3
+    const yParticipant = d3
       .scaleLinear()
       .domain(d3.extent(data, d => d.partecipanti).reverse())
-      .nice()
+      .range(yRange);
+
+    const yUtile = d3
+      .scaleLinear()
+      .domain(d3.extent(data, d => d.utile).reverse())
       .range(yRange);
 
     const r = d3.scaleSqrt().domain(d3.extent(data, d => d.partecipanti));
@@ -58,6 +58,20 @@ fetch("https://www.lascuolaopensource.xyz/didattica/index")
       data.map(d => d.xyz),
       ["#ffd400", " #dc64d6", "#12c8bb"]
     );
+
+    // application state
+    const visualizedItems = {
+      x: true,
+      y: true,
+      z: true,
+      "non svolti": true
+    };
+
+    const yScales = {
+      indice: y,
+      participant: yParticipant,
+      utile: yUtile
+    };
 
     let currentZoom = 1;
 
@@ -71,10 +85,10 @@ fetch("https://www.lascuolaopensource.xyz/didattica/index")
         (tx + width - margin.right - margin.left) * k
       ]);
 
-      y.range([
-        (margin.top + ty) * k,
-        (ty + height - margin.top - margin.bottom) * k
-      ]);
+      // y.range([
+      //   (margin.top + ty) * k,
+      //   (ty + height - margin.top - margin.bottom) * k
+      // ]);
 
       update();
     });
@@ -86,6 +100,7 @@ fetch("https://www.lascuolaopensource.xyz/didattica/index")
       d.x = x(d.start) || 0;
       d.svolto = d.status;
       d.color = d.svolto ? color(d.xyz) : "#ddd";
+      d.index = i;
       d.y = currentY(i);
       return d;
     });
@@ -93,9 +108,23 @@ fetch("https://www.lascuolaopensource.xyz/didattica/index")
     const updateData = () => {
       data.forEach((d, i) => {
         d.x = x(d.start) || 0;
-        d.y = currentY(currentY == y ? i : d.partecipanti);
+        let datum;
+        switch (currentY) {
+          case y:
+            datum = d.index;
+            break;
+          case yParticipant:
+            datum = d.partecipanti;
+            break;
+          case yUtile:
+            datum = d.utile;
+            break;
+        }
+
+        d.y = currentY(datum);
       });
     };
+
     const update = () => {
       updateData();
       svg.selectAll(".yearLine").attr("transform", d => `translate(${x(d)} 0)`);
@@ -158,7 +187,7 @@ fetch("https://www.lascuolaopensource.xyz/didattica/index")
       .style("width", `100px`)
       .style("position", "absolute")
       .style("top", "0")
-      .style("right", "300px")
+      .style("right", "500px")
       .attr("font-family", "sans-serif")
       .attr("font-size", 10)
       .attr("dy", "0.35em");
@@ -187,7 +216,7 @@ fetch("https://www.lascuolaopensource.xyz/didattica/index")
     const showTooltip = function(d) {
       const format = o => {
         return Object.keys(o)
-          .map(k => `<p>${k}: ${o[k]}</p>`)
+          .map(k => `<p><b>${k}</b><br/>${o[k]}</p>`)
           .join("");
       };
 
@@ -303,9 +332,16 @@ fetch("https://www.lascuolaopensource.xyz/didattica/index")
       .style("left", 10 + "px");
 
     const dropdown = controls.append("select").on("change", d => {
-      currentY = d3.event.target.selectedIndex == 0 ? y : yPartecipant;
+      currentY = yScales[d3.event.target.value];
       updateYAxis();
     });
+
+    dropdown
+      .selectAll("option")
+      .data(Object.keys(yScales))
+      .join("option")
+      .attr("value", d => d)
+      .text(d => d);
 
     const checkboxes = controls
       .selectAll("div")
@@ -319,7 +355,33 @@ fetch("https://www.lascuolaopensource.xyz/didattica/index")
       .attr("checked", true)
       .on("change", (d, i) => {
         visualizedItems[d] = !visualizedItems[d];
-        update();
+
+        const activeItems = [];
+        Object.keys(visualizedItems).forEach(d => {
+          if (visualizedItems[d]) activeItems.push(d);
+        });
+
+        let c = 0;
+        data.forEach(d => {
+          if (activeItems.indexOf(d.xyz) != -1) {
+            if (d.index == -1) d.entering = true;
+            d.index = c;
+            c++;
+          } else {
+            if (d.index != -1) d.entering = false;
+            d.index = -1;
+          }
+        });
+
+        y.domain([0, c]);
+
+        updateData();
+
+        d3.selectAll(".corso")
+          .transition()
+          .duration(d => (d.index == -1 ? 0 : 600))
+          .attr("transform", d => `translate(${d.x},${d.y})`)
+          .style("opacity", d => (d.index == -1 ? 0 : 1));
       });
 
     checkboxes
@@ -327,7 +389,4 @@ fetch("https://www.lascuolaopensource.xyz/didattica/index")
       .style("color", "white")
       .attr("for", d => d)
       .text(d => d);
-  })
-  .catch(e => {
-    alert(`errore: ${e}. Apri la console per ulteriori info`);
   });

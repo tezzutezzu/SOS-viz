@@ -1,0 +1,44 @@
+Child	Parent	Tooltip	Size	Links
+cda			74	
+hackerspace	cda		18	
+fablab / falegnameria 	hackerspace	maurizio 	2	
+camera obscura	hackerspace	niccolò	2	
+shop 	hackerspace		2	
+sistemazione spazi	hackerspace		2	
+lab sopra	sistemazione spazi		2	
+lab sotto	sistemazione spazi		2	
+camera oscura	sistemazione spazi		2	
+messa in funzione macchine cnc	hackerspace		2	
+aggiornamento cnc 3 assi	messa in funzione macchine cnc		2	
+ricerca	cda	tommaso	14	
+ricerca dal basso (prop. community)	ricerca		2	
+ricerca interna (per sos)	ricerca		2	
+ricerca esterna (aziende, privati)	ricerca		2	
+join	ricerca esterna (aziende, privati)		2	
+A-Team	ricerca esterna (aziende, privati)		2	
+open peer review	ricerca esterna (aziende, privati)		2	
+orgia	ricerca esterna (aziende, privati)		2	
+didattica	cda	arianna	12	
+definizione della didattica	didattica	nana	2	
+programmazione didattica	didattica	saria, piero	2	
+visualizzazione dati passati	programmazione didattica	danilo	2	
+programmazione online	didattica	emidio	2	
+organizzazione corsi attuali	programmazione online	enrico	2	
+raccordo sostenibilità-didattica	didattica	emidio	2	sostenibilità
+comunicazione	cda	alessandro	6	
+strategia e contenuti (statement)	comunicazione		2	
+design e sviluppo (sito)	comunicazione		2	
+new publishing (produzione culturale)	comunicazione		2	
+sostenibilità	cda	daniele	16	
+analisi bilancio	sostenibilità	marica	2	
+predisposizione preventivo uscita	sostenibilità	marica	2	
+mappatura fonti di entrata	sostenibilità	marica	2	
+verbali di assemblea	mappatura fonti di entrata		2	
+gestione nuovi soci 	mappatura fonti di entrata		2	
+chiusura di bilancio 2019	mappatura fonti di entrata		2	
+rapporti con i consulenti esterni	mappatura fonti di entrata		2	
+iscrizione legacoop	mappatura fonti di entrata		2	
+cura	cda	lucilla	8	
+schema governance	cura	fred, daniele, emanuele	2	design e sviluppo (sito)
+manifesto dinamico	cura	alessandro, emanuele	2	
+cura peer to peer	cura	paulina	2	

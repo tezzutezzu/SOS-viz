@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="it">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Gerarchia</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/5.15.0/d3.min.js"></script>
+    <script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Poppins:wght@400;600&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+    />
+
+    <style>
+      html {
+        font-size: calc(1em + 0.01vw);
+      }
+      .mytooltip {
+        position: absolute;
+        top: 0;
+        left: 0;
+        pointer-events: none;
+        background: white;
+      }
+
+      text {
+        font-size: 10px;
+      }
+    </style>
+
+    <body>
+      <div class="mytooltip"><p></p></div>
+
+      <script src="gerarchia_forze.js"></script>
+    </body>
+  </head>
+</html>
