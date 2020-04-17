@@ -60,19 +60,17 @@ function loadData() {
         .force("x", d3.forceX())
         .force("y", d3.forceY());
 
-    const group = svg.append("g").attr("class", "viz")
+      const group = svg.append("g").attr("class", "viz");
 
-    const link = group
-      .append("g")
-      .attr("stroke", "#999")
-      .attr("stroke-opacity", 0.6)
-      .selectAll("line")
-      .data(links)
-      .join("line");
-      
+      const link = group
+        .append("g")
+        .attr("stroke", "#999")
+        .attr("stroke-opacity", 0.6)
+        .selectAll("line")
+        .data(links)
+        .join("line");
 
-
-      const node = svg.append("g").selectAll("g").data(nodes).join("g");
+      const node = group.append("g").selectAll("g").data(nodes).join("g");
 
       node
         .append("g")
@@ -119,13 +117,13 @@ function loadData() {
 
         node.attr("transform", (d) => `translate(${d.x} ${d.y})`);
       });
-    });
 
-    d3
-      .zoom()
-      .on("zoom", () => {
-        group.attr("transform", d3.event.transform)
+      console.log(group);
+
+      d3.zoom().on("zoom", () => {
+        group.attr("transform", d3.event.transform);
       })(svg);
+    });
   });
 }
 
